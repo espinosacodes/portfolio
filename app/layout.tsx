@@ -36,7 +36,7 @@ const oswald = Oswald({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://github.com/espinosacodes"),
+  metadataBase: new URL("https://espinosacodes.github.io/portfolio/"),
   title: "Santiago Espinosa — Software & AI Engineer",
   description: "Portfolio of Santiago Espinosa, a software and AI engineer building intelligent products, agents, and expressive digital experiences.",
   openGraph: {

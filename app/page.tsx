@@ -25,7 +25,6 @@ export default function Home() {
       <header className="portfolio-nav">
         <a href="#top" className="wordmark" aria-label="Santiago Espinosa home">SE<span>/</span>26</a>
         <nav aria-label="Primary navigation"><a href="#work">Work</a><a href="#about">About</a><a href="https://github.com/espinosacodes" target="_blank" rel="noreferrer">GitHub</a></nav>
-        <a className="availability" href="https://github.com/espinosacodes" target="_blank" rel="noreferrer"><i /> Available for work</a>
       </header>
 
       <section id="top" className="portfolio-hero">
@@ -38,7 +37,7 @@ export default function Home() {
         </motion.div>
         <p className="hero-intro">I build intelligent products, autonomous agents, and expressive digital experiences from Colombia to the world.</p>
         <a className="scroll-cue" href="#work"><span>Selected work</span><ArrowDownRight /></a>
-        <div className="hero-coordinates"><MapPin size={14} /> 3.4516° N, 76.5320° W</div>
+        <div className="hero-coordinates"><MapPin size={14} /> In shell</div>
       </section>
 
       <section className="statement" id="about">
