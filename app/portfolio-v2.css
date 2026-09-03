@@ -10,3 +10,36 @@
 @keyframes v2-float-one{to{translate:2vw -1.5vw;scale:1.05}}
 @keyframes v2-float-two{to{translate:-1.5vw -2vw;scale:.94}}
 @media(prefers-reduced-motion:reduce){.v2-tracklines,.v2-orbit{animation:none}.v2-face,.v2-tracklines,.v2-orbit{transition:none}}
+
+/* Immersive hero: aligned portrait states + cursor-driven liquid reveal. */
+.v2-hero{--px:50vw;--py:50vh}
+.v2-liquid-trail{position:absolute;z-index:7;inset:0;pointer-events:none;mix-blend-mode:multiply}
+.v2-face{inset:auto 0 -22% 0;margin:auto;width:min(78vw,1120px);height:125%;transform:translate(calc(var(--mx)*18px),calc(var(--my)*10px));transform-origin:50% 65%;filter:drop-shadow(0 25px 34px rgba(37,41,31,.08))}
+.v2-face img{object-fit:contain!important;object-position:center bottom!important}
+.v2-exo-ghost{opacity:.14;mix-blend-mode:multiply;animation:v2-exo-pulse 4s ease-in-out infinite}
+.v2-exo-reveal{opacity:.98;-webkit-mask-image:radial-gradient(circle 145px at var(--fx,50%) var(--fy,50%),#000 0 42%,rgba(0,0,0,.92) 58%,transparent 76%);mask-image:radial-gradient(circle 145px at var(--fx,50%) var(--fy,50%),#000 0 42%,rgba(0,0,0,.92) 58%,transparent 76%);filter:contrast(1.05) saturate(1.12)}
+.v2-tech-ring{position:absolute;z-index:2;left:50%;top:51%;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);border:1px dashed rgba(255,26,77,.38)}
+.v2-tech-ring::before,.v2-tech-ring::after{content:"";position:absolute;background:var(--acid);border-radius:50%;box-shadow:0 0 14px var(--acid)}
+.v2-tech-ring::before{width:7px;height:7px;left:7%;top:22%}.v2-tech-ring::after{width:4px;height:4px;right:12%;bottom:17%}
+.v2-tech-ring-a{width:min(71vw,980px);aspect-ratio:1;animation:v2-ring-spin 24s linear infinite}
+.v2-tech-ring-b{width:min(57vw,790px);aspect-ratio:1;border-style:solid;border-color:rgba(37,41,31,.12);animation:v2-ring-spin 18s linear infinite reverse}
+.v2-hero-status{position:absolute;z-index:9;right:2vw;bottom:104px;font-size:8px;font-weight:800;letter-spacing:.2em;writing-mode:vertical-rl;display:flex;align-items:center;gap:8px}.v2-hero-status i{width:7px;height:7px;background:var(--acid);border-radius:50%;box-shadow:0 0 12px var(--acid);animation:v2-status 1.4s ease-in-out infinite}
+@keyframes v2-ring-spin{to{rotate:360deg}}
+@keyframes v2-exo-pulse{50%{opacity:.25;filter:saturate(1.4)}}
+@keyframes v2-status{50%{opacity:.25;scale:.65}}
+@media(max-width:800px){.v2-face{inset:auto -25vw -10% -25vw;width:150vw;height:104%}.v2-tech-ring-a{width:128vw}.v2-tech-ring-b{width:103vw}.v2-exo-reveal{-webkit-mask-image:radial-gradient(circle 100px at var(--fx,50%) var(--fy,50%),#000 0 45%,transparent 78%);mask-image:radial-gradient(circle 100px at var(--fx,50%) var(--fy,50%),#000 0 45%,transparent 78%)}.v2-hero-status{display:none}}
+@media(prefers-reduced-motion:reduce){.v2-exo-ghost,.v2-tech-ring,.v2-hero-status i{animation:none}.v2-liquid-trail{display:none}}
+
+@supports(animation-timeline:view()){
+  .v2-opening h1{animation:v2-title-drive linear both;animation-timeline:view();animation-range:entry 0% cover 55%}
+  .v2-project-image{animation:v2-project-drive linear both;animation-timeline:view();animation-range:entry 0% cover 65%}
+  .v2-project:nth-child(even) .v2-project-image{animation-name:v2-project-drive-alt}
+  .v2-project-image img{animation:v2-image-depth linear both;animation-timeline:view();animation-range:entry 0% exit 100%}
+  .v2-quote>p{animation:v2-quote-drive linear both;animation-timeline:view();animation-range:entry 0% cover 60%}
+}
+@keyframes v2-title-drive{from{transform:translateX(-8vw) skewX(-5deg)}to{transform:translateX(0) skewX(0)}}
+@keyframes v2-project-drive{from{clip-path:inset(0 100% 0 0);transform:translateX(-5vw)}to{clip-path:inset(0);transform:translateX(0)}}
+@keyframes v2-project-drive-alt{from{clip-path:inset(0 0 0 100%);transform:translateX(5vw)}to{clip-path:inset(0);transform:translateX(0)}}
+@keyframes v2-image-depth{from{scale:1.12;translate:0 -3%}to{scale:1;translate:0 3%}}
+@keyframes v2-quote-drive{from{transform:translateY(12vh) skewY(3deg)}to{transform:translateY(0) skewY(0)}}
+@media(prefers-reduced-motion:reduce){.v2-opening h1,.v2-project-image,.v2-project-image img,.v2-quote>p{animation:none!important}}

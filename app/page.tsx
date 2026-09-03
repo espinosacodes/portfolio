@@ -3,8 +3,10 @@
 import Image, { type StaticImageData } from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { motion, useMotionValue, useSpring } from "framer-motion"
+import Lenis from "lenis"
 import { ArrowDown, ArrowUpRight, Github, Menu, X } from "lucide-react"
 import hero from "@/public/portfolio-v2/santiago-hero.png"
+import heroExo from "@/public/portfolio-v2/santiago-exoskeleton.png"
 import dreamjobDiagram from "@/public/portfolio-v2/dreamjob-architecture.svg"
 import cataraDiagram from "@/public/portfolio-v2/catara-architecture.svg"
 import talktown from "@/public/portfolio-v2/talktown.png"
@@ -38,15 +40,76 @@ function CustomCursor() {
   return <motion.div className={`v2-cursor ${label ? "is-active" : ""}`} style={{ x: sx, y: sy }}>{label}</motion.div>
 }
 
+function LiquidTrail() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const context = canvas.getContext("2d")
+    if (!context) return
+    let frame = 0
+    let pointer = { x: innerWidth / 2, y: innerHeight / 2 }
+    const trail = Array.from({ length: 14 }, () => ({ ...pointer }))
+    const resize = () => {
+      const dpr = Math.min(devicePixelRatio, 2)
+      canvas.width = innerWidth * dpr
+      canvas.height = innerHeight * dpr
+      canvas.style.width = `${innerWidth}px`
+      canvas.style.height = `${innerHeight}px`
+      context.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
+    const move = (event: PointerEvent) => { pointer = { x: event.clientX, y: event.clientY } }
+    const draw = () => {
+      context.clearRect(0, 0, innerWidth, innerHeight)
+      trail[0].x += (pointer.x - trail[0].x) * .2
+      trail[0].y += (pointer.y - trail[0].y) * .2
+      for (let i = 1; i < trail.length; i++) {
+        trail[i].x += (trail[i - 1].x - trail[i].x) * (.25 - i * .006)
+        trail[i].y += (trail[i - 1].y - trail[i].y) * (.25 - i * .006)
+      }
+      context.globalCompositeOperation = "lighter"
+      trail.forEach((point, i) => {
+        const radius = 26 - i * 1.35
+        const gradient = context.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius)
+        gradient.addColorStop(0, `rgba(255,26,77,${.12 - i * .005})`)
+        gradient.addColorStop(1, "rgba(255,26,77,0)")
+        context.fillStyle = gradient
+        context.beginPath(); context.arc(point.x, point.y, radius, 0, Math.PI * 2); context.fill()
+      })
+      frame = requestAnimationFrame(draw)
+    }
+    resize(); draw()
+    window.addEventListener("resize", resize)
+    window.addEventListener("pointermove", move, { passive: true })
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("resize", resize); window.removeEventListener("pointermove", move) }
+  }, [])
+  return <canvas className="v2-liquid-trail" ref={canvasRef} aria-hidden="true" />
+}
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
   const heroSection = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const lenis = new Lenis({ duration: 1.15, smoothWheel: true })
+    let frame = 0
+    const loop = (time: number) => { lenis.raf(time); frame = requestAnimationFrame(loop) }
+    frame = requestAnimationFrame(loop)
+    return () => { cancelAnimationFrame(frame); lenis.destroy() }
+  }, [])
   useEffect(() => {
     const section = heroSection.current
     if (!section) return
     const move = (event: PointerEvent) => {
       section.style.setProperty("--mx", `${event.clientX / window.innerWidth - .5}`)
       section.style.setProperty("--my", `${event.clientY / window.innerHeight - .5}`)
+      section.style.setProperty("--px", `${event.clientX}px`)
+      section.style.setProperty("--py", `${event.clientY}px`)
+      const portrait = section.querySelector<HTMLElement>(".v2-face")
+      if (portrait) {
+        const bounds = portrait.getBoundingClientRect()
+        portrait.style.setProperty("--fx", `${event.clientX - bounds.left}px`)
+        portrait.style.setProperty("--fy", `${event.clientY - bounds.top}px`)
+      }
     }
     window.addEventListener("pointermove", move, { passive: true })
     return () => window.removeEventListener("pointermove", move)
@@ -61,10 +124,17 @@ export default function Home() {
     {menuOpen && <nav className="v2-menu"><a href="#projects" onClick={() => setMenuOpen(false)}>Projects</a><a href="#manifesto" onClick={() => setMenuOpen(false)}>About</a><a href="https://github.com/espinosacodes" target="_blank" rel="noreferrer">GitHub</a></nav>}
 
     <section id="home" className="v2-hero" ref={heroSection}>
+      <LiquidTrail />
       <div className="v2-tracklines" />
       <div className="v2-orbit v2-orbit-one" />
       <div className="v2-orbit v2-orbit-two" />
-      <motion.div className="v2-face" initial={{ y: 70, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 1, delay: .2, ease: [.2,.8,.2,1] }}><Image src={hero} alt="Santiago Espinosa" fill priority sizes="(max-width: 800px) 90vw, 58vw" /></motion.div>
+      <div className="v2-tech-ring v2-tech-ring-a" /><div className="v2-tech-ring v2-tech-ring-b" />
+      <motion.div className="v2-face" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.25, delay: .15, ease: [.16,1,.3,1] }}>
+        <Image className="v2-base-person" src={hero} alt="Santiago Espinosa" fill priority sizes="(max-width: 800px) 120vw, 74vw" />
+        <Image className="v2-exo-ghost" src={heroExo} alt="" fill priority aria-hidden="true" sizes="(max-width: 800px) 120vw, 74vw" />
+        <Image className="v2-exo-reveal" src={heroExo} alt="Santiago Espinosa wearing a futuristic engineering exoskeleton" fill priority sizes="(max-width: 800px) 120vw, 74vw" />
+      </motion.div>
+      <div className="v2-hero-status"><i /> INTERACTIVE SYSTEM ONLINE</div>
       <div className="v2-latest"><span>LATEST BUILD</span><a href="https://github.com/espinosacodes/dreamJob" target="_blank" rel="noreferrer" data-cursor="OPEN"><Image src={dreamjobDiagram} alt="DreamJob system architecture" fill sizes="150px" /><b>DreamJob</b></a></div>
       <a href="#projects" className="v2-down" aria-label="View projects"><ArrowDown /></a>
     </section>
