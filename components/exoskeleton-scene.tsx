@@ -7,10 +7,53 @@ import * as THREE from "three"
 const metal = { color: "#8d9690", metalness: .88, roughness: .24 }
 const darkMetal = { color: "#2b302c", metalness: .9, roughness: .2 }
 
-function HelmetRig() {
+const visorVertex = `
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  void main() {
+    vUv = uv;
+    vNormal = normalize(normalMatrix * normal);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`
+
+const visorFragment = `
+  uniform float uTime;
+  uniform float uLocked;
+  uniform vec2 uPointer;
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  float field(vec2 p) {
+    return sin(p.x * 19.0 + uTime * 1.4) * sin(p.y * 15.0 - uTime) * .035
+      + sin((p.x + p.y) * 31.0 - uTime * 1.8) * .018;
+  }
+  void main() {
+    vec2 ratio = vec2(1.0, 1.22);
+    float distanceToPointer = distance(vUv * ratio, uPointer * ratio) + field(vUv);
+    float radius = .17 + sin(uTime * 1.8) * .012;
+    float reveal = 1.0 - smoothstep(radius, radius + .12, distanceToPointer);
+    reveal = mix(reveal, 1.0, uLocked);
+    float edge = 1.0 - smoothstep(.0, .045, abs(distanceToPointer - radius));
+    edge *= 1.0 - uLocked;
+    float fresnel = pow(1.0 - abs(vNormal.z), 2.2);
+    vec3 smoke = mix(vec3(.07, .08, .075), vec3(.58, .63, .60), fresnel);
+    vec3 color = mix(smoke, vec3(1.0, .025, .18), edge * .86);
+    float alpha = reveal * (.12 + fresnel * .27) + edge * .48;
+    if (alpha < .015) discard;
+    gl_FragColor = vec4(color, alpha);
+  }
+`
+
+function HelmetRig({ locked }: { locked: boolean }) {
   const rig = useRef<THREE.Group>(null)
   const rotor = useRef<THREE.Group>(null)
+  const visor = useRef<THREE.ShaderMaterial>(null)
   const pointerTarget = useRef({ x: 0, y: 0 })
+  const visorUniforms = useMemo(() => ({
+    uTime: { value: 0 },
+    uLocked: { value: 0 },
+    uPointer: { value: new THREE.Vector2(.5, .5) },
+  }), [])
   const nodes = useMemo(() => Array.from({ length: 18 }, (_, index) => {
     const angle = (index / 18) * Math.PI * 2
     return { angle, x: Math.cos(angle) * 2.17, y: Math.sin(angle) * 2.17 }
@@ -33,6 +76,11 @@ function HelmetRig() {
     rig.current.rotation.z = THREE.MathUtils.damp(rig.current.rotation.z, pointer.x * -.055, 3, delta)
     rig.current.position.y = .2 + Math.sin(clock.elapsedTime * .8) * .035
     if (rotor.current) rotor.current.rotation.z = clock.elapsedTime * .08
+    if (visor.current) {
+      visor.current.uniforms.uTime.value = clock.elapsedTime
+      visor.current.uniforms.uPointer.value.lerp(new THREE.Vector2(pointer.x * .5 + .5, pointer.y * .5 + .5), .12)
+      visor.current.uniforms.uLocked.value = THREE.MathUtils.damp(visor.current.uniforms.uLocked.value, locked ? 1 : 0, 5, delta)
+    }
   })
 
   return <group ref={rig} position={[0, .62, 0]} scale={.68}>
@@ -46,9 +94,9 @@ function HelmetRig() {
       </mesh>)}
     </group>
 
-    <mesh position={[0, .3, .2]} scale={[1.04, 1, .42]}>
-      <sphereGeometry args={[1.62, 64, 32, 0, Math.PI * 2, 0, Math.PI * .52]} />
-      <meshPhysicalMaterial color="#8d9690" metalness={.18} roughness={.08} transparent opacity={.055} transmission={.72} thickness={.12} side={THREE.DoubleSide} />
+    <mesh position={[0, .12, .18]} scale={[1.02, 1.15, .43]}>
+      <sphereGeometry args={[1.62, 72, 48]} />
+      <shaderMaterial ref={visor} uniforms={visorUniforms} vertexShader={visorVertex} fragmentShader={visorFragment} transparent depthWrite={false} side={THREE.DoubleSide} />
     </mesh>
 
     {[-1, 1].map(side => <group key={side} position={[side * 1.78, .02, .06]}>
@@ -66,12 +114,12 @@ function HelmetRig() {
   </group>
 }
 
-export default function ExoskeletonScene() {
+export default function ExoskeletonScene({ locked = false }: { locked?: boolean }) {
   return <Canvas camera={{ position: [0, 0, 7.4], fov: 36 }} dpr={[1, 1.7]} gl={{ alpha: true, antialias: true }}>
     <ambientLight intensity={1.6} />
     <directionalLight position={[3, 5, 6]} intensity={3.2} color="#ffffff" />
     <pointLight position={[-3, 1, 4]} intensity={16} distance={8} color="#ff1a4d" />
     <pointLight position={[3, -2, 3]} intensity={8} distance={7} color="#ffffff" />
-    <HelmetRig />
+    <HelmetRig locked={locked} />
   </Canvas>
 }

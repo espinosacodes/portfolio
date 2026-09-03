@@ -90,6 +90,7 @@ function LiquidTrail() {
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [helmetLocked, setHelmetLocked] = useState(false)
   const heroSection = useRef<HTMLElement>(null)
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.15, smoothWheel: true })
@@ -133,8 +134,9 @@ export default function Home() {
       <div className="v2-tech-ring v2-tech-ring-a" /><div className="v2-tech-ring v2-tech-ring-b" />
       <div className="v2-face">
         <Image className="v2-base-person" src={hero} alt="Santiago Espinosa" fill priority sizes="(max-width: 800px) 120vw, 74vw" />
-        <div className="v2-exo-webgl" aria-label="Interactive three-dimensional engineering exoskeleton"><ExoskeletonScene /></div>
+        <div className="v2-exo-webgl" aria-label="Interactive three-dimensional engineering exoskeleton"><ExoskeletonScene locked={helmetLocked} /></div>
       </div>
+      <button className={`v2-lock-control ${helmetLocked ? "is-locked" : ""}`} onClick={() => setHelmetLocked(value => !value)} aria-pressed={helmetLocked} data-cursor={helmetLocked ? "FREE" : "LOCK"}><span>{helmetLocked ? "RELEASE EXO" : "LOCK EXO"}</span><i /></button>
       <div className="v2-hero-status"><i /> INTERACTIVE SYSTEM ONLINE</div>
       <div className="v2-latest"><span>LATEST BUILD</span><a href="https://github.com/espinosacodes/dreamJob" target="_blank" rel="noreferrer" data-cursor="OPEN"><Image src={dreamjobDiagram} alt="DreamJob system architecture" fill sizes="150px" /><b>DreamJob</b></a></div>
       <a href="#projects" className="v2-down" aria-label="View projects"><ArrowDown /></a>
