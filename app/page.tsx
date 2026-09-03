@@ -1,82 +1,85 @@
 "use client"
 
-import Image from "next/image"
-import portrait from "@/public/pfp/santiago.jpg"
-import { motion, useScroll, useTransform } from "framer-motion"
-import { ArrowDownRight, ArrowUpRight, Github, MapPin, Sparkles } from "lucide-react"
+import Image, { type StaticImageData } from "next/image"
+import { useEffect, useRef, useState } from "react"
+import { motion, useMotionValue, useSpring } from "framer-motion"
+import { ArrowDown, ArrowUpRight, Github, Menu, X } from "lucide-react"
+import hero from "@/public/portfolio-v2/santiago-hero.png"
+import dreamjobDiagram from "@/public/portfolio-v2/dreamjob-architecture.svg"
+import cataraDiagram from "@/public/portfolio-v2/catara-architecture.svg"
+import talktown from "@/public/portfolio-v2/talktown.png"
+import hackathon from "@/public/portfolio-v2/hackathon.png"
+import freeticket from "@/public/portfolio-v2/freeticket.png"
+import "./portfolio-v2.css"
 
-const projects = [
-  { name: "GhostDial", tag: "AI · Go", description: "An AI agent that calls phone menus so you never sit on hold to cancel a subscription again.", href: "https://github.com/espinosacodes/GhostDial", number: "01" },
-  { name: "DreamJob", tag: "Agents · Automation", description: "A swipe-first job engine that finds roles and tailors every application with an AI agent.", href: "https://github.com/espinosacodes/dreamJob", number: "02" },
-  { name: "Browser Sync", tag: "Security · Python", description: "Move browser logins and active sessions between machines with a private, local-first workflow.", href: "https://github.com/espinosacodes/browser-sync", number: "03" },
-  { name: "Local LLM Longrun", tag: "Local AI · Devtools", description: "A persistent Claude Code-style coding agent for local Ollama models, built for long-running work.", href: "https://github.com/espinosacodes/local-llm-longrun", number: "04" },
-  { name: "Catara Growth Engine", tag: "LangGraph · TypeScript", description: "A closed-loop AI sales agent connecting research, outreach, scheduling, and vector-powered memory.", href: "https://github.com/espinosacodes/catara-growth-engine", number: "05" },
-  { name: "Cosmoscroll", tag: "Creative Dev · 3D", description: "An interactive journey through stars, galaxies, relativity, wormholes, and black holes.", href: "https://github.com/espinosacodes/cosmoscroll", number: "06" },
+type Project = { title: string; date: string; description: string; image: StaticImageData; href: string; live?: string; kind: string }
+const projects: Project[] = [
+  { title: "DreamJob", date: "August, 2026", description: "A phone-first job engine with a Go service, deterministic Rust core, Flutter client, and human-gated browser agent.", image: dreamjobDiagram, href: "https://github.com/espinosacodes/dreamJob", kind: "Architecture / Agent system" },
+  { title: "Catara Growth Engine", date: "June, 2026", description: "A multi-tenant LangGraph sales system connecting RAG, channels, webhooks, rate controls, and meeting conversion.", image: cataraDiagram, href: "https://github.com/espinosacodes/catara-growth-engine", kind: "Architecture / AI platform" },
+  { title: "TalkTown", date: "April, 2026", description: "A live social experience designed around conversation, presence, and a playful real-time interface.", image: talktown, href: "https://github.com/espinosacodes/TalkTown", live: "https://talk-town-five.vercel.app", kind: "Live product / TypeScript" },
+  { title: "Hackathon Reto 4", date: "June, 2026", description: "A shipped web experience built under hackathon constraints, from idea to a working public product.", image: hackathon, href: "https://github.com/espinosacodes/hackaton-reto4", live: "https://hackaton-reto4.vercel.app", kind: "Live product / JavaScript" },
+  { title: "FreeTicket", date: "August, 2026", description: "A browser-based product with a public interface and a direct path from code to user experience.", image: freeticket, href: "https://github.com/espinosacodes/freeticket", live: "https://espinosacodes.github.io/freeticket/", kind: "Live product / JavaScript" },
 ]
 
-const stack = ["TypeScript", "Python", "Go", "React", "Next.js", "AI agents", "LangGraph", "Cloud"]
+function CustomCursor() {
+  const x = useMotionValue(-80), y = useMotionValue(-80)
+  const sx = useSpring(x, { stiffness: 600, damping: 42 }), sy = useSpring(y, { stiffness: 600, damping: 42 })
+  const [label, setLabel] = useState("")
+  useEffect(() => {
+    const move = (event: PointerEvent) => {
+      const hit = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null
+      const interactive = hit?.closest("[data-cursor]") as HTMLElement | null
+      const next = interactive?.dataset.cursor || ""
+      setLabel(next); x.set(event.clientX - (next ? 39 : 7)); y.set(event.clientY - (next ? 39 : 7))
+    }
+    window.addEventListener("pointermove", move)
+    return () => window.removeEventListener("pointermove", move)
+  }, [x, y])
+  return <motion.div className={`v2-cursor ${label ? "is-active" : ""}`} style={{ x: sx, y: sy }}>{label}</motion.div>
+}
 
 export default function Home() {
-  const { scrollYProgress } = useScroll()
-  const portraitY = useTransform(scrollYProgress, [0, 0.35], [0, 120])
-  const titleX = useTransform(scrollYProgress, [0, 0.3], [0, -90])
+  const [menuOpen, setMenuOpen] = useState(false)
+  const heroSection = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const section = heroSection.current
+    if (!section) return
+    const move = (event: PointerEvent) => {
+      section.style.setProperty("--mx", `${event.clientX / window.innerWidth - .5}`)
+      section.style.setProperty("--my", `${event.clientY / window.innerHeight - .5}`)
+    }
+    window.addEventListener("pointermove", move, { passive: true })
+    return () => window.removeEventListener("pointermove", move)
+  }, [])
+  return <main className="v2-site">
+    <CustomCursor />
+    <header className="v2-header">
+      <a href="#home" className="v2-name">SANTIAGO<br /><b>ESPINOSA</b></a>
+      <a href="#home" className="v2-monogram">SE<span>_</span></a>
+      <div className="v2-actions"><a href="#projects" className="v2-project-button">PROJECTS <ArrowUpRight /></a><button onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">{menuOpen ? <X /> : <Menu />}</button></div>
+    </header>
+    {menuOpen && <nav className="v2-menu"><a href="#projects" onClick={() => setMenuOpen(false)}>Projects</a><a href="#manifesto" onClick={() => setMenuOpen(false)}>About</a><a href="https://github.com/espinosacodes" target="_blank" rel="noreferrer">GitHub</a></nav>}
 
-  return (
-    <main className="portfolio-shell">
-      <header className="portfolio-nav">
-        <a href="#top" className="wordmark" aria-label="Santiago Espinosa home">SE<span>/</span>26</a>
-        <nav aria-label="Primary navigation"><a href="#work">Work</a><a href="#about">About</a><a href="https://github.com/espinosacodes" target="_blank" rel="noreferrer">GitHub</a></nav>
-      </header>
+    <section id="home" className="v2-hero" ref={heroSection}>
+      <div className="v2-tracklines" />
+      <div className="v2-orbit v2-orbit-one" />
+      <div className="v2-orbit v2-orbit-two" />
+      <motion.div className="v2-face" initial={{ y: 70, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 1, delay: .2, ease: [.2,.8,.2,1] }}><Image src={hero} alt="Santiago Espinosa" fill priority sizes="(max-width: 800px) 90vw, 58vw" /></motion.div>
+      <div className="v2-latest"><span>LATEST BUILD</span><a href="https://github.com/espinosacodes/dreamJob" target="_blank" rel="noreferrer" data-cursor="OPEN"><Image src={dreamjobDiagram} alt="DreamJob system architecture" fill sizes="150px" /><b>DreamJob</b></a></div>
+      <a href="#projects" className="v2-down" aria-label="View projects"><ArrowDown /></a>
+    </section>
 
-      <section id="top" className="portfolio-hero">
-        <div className="hero-kicker"><Sparkles size={16} /> Software engineer + AI engineer</div>
-        <motion.h1 style={{ x: titleX }}>SANTIAGO<span>ESPINOSA</span></motion.h1>
-        <motion.div className="portrait-frame" style={{ y: portraitY }}>
-          <div className="portrait-index">001 / CO</div>
-          <Image src={portrait} alt="Santiago Espinosa" fill priority sizes="(max-width: 768px) 76vw, 36vw" />
-          <div className="portrait-glow" />
-        </motion.div>
-        <p className="hero-intro">I build intelligent products, autonomous agents, and expressive digital experiences from Colombia to the world.</p>
-        <a className="scroll-cue" href="#work"><span>Selected work</span><ArrowDownRight /></a>
-        <div className="hero-coordinates"><MapPin size={14} /> In shell</div>
-      </section>
+    <section className="v2-opening" id="manifesto"><p>SOFTWARE ENGINEER<br />+ AI ENGINEER</p><h1>BUILD THE<br /><span>SYSTEM.</span><br />SHIP THE<br />EXPERIENCE.</h1><div><p>I design agents, infrastructure, and interfaces as one connected product.</p><p>Based in Colombia. Building for everywhere.</p></div></section>
 
-      <section className="statement" id="about">
-        <p className="section-label">[ Profile ]</p>
-        <h2>ENGINEERING WITH<br />A <em>HUMAN</em> PULSE.</h2>
-        <div className="statement-copy">
-          <p>I turn ambitious ideas into real software. My work sits where AI systems, resilient engineering, and sharp product thinking meet.</p>
-          <a href="https://github.com/espinosacodes" target="_blank" rel="noreferrer">63 followers · 80+ public projects <ArrowUpRight size={18} /></a>
-        </div>
-      </section>
+    <section id="projects" className="v2-projects">
+      {projects.map((project, index) => <article className={`v2-project p${index+1}`} key={project.title}>
+        <div className="v2-project-date"><span>{project.title}</span><span>{project.date}</span></div>
+        <a href={project.live || project.href} target="_blank" rel="noreferrer" className="v2-project-image" data-cursor={project.live ? "VISIT" : "CODE"}><Image src={project.image} alt={`${project.title}: ${project.kind}`} fill sizes="(max-width: 800px) 94vw, 76vw" /></a>
+        <div className="v2-project-copy"><p>{project.date}</p><h2>{project.title}</h2><p>{project.description}</p><span>{project.kind}</span><div><a href={project.href} target="_blank" rel="noreferrer">Repository <ArrowUpRight /></a>{project.live && <a href={project.live} target="_blank" rel="noreferrer">Live site <ArrowUpRight /></a>}</div></div>
+      </article>)}
+    </section>
 
-      <section className="work-section" id="work">
-        <div className="work-heading">
-          <p className="section-label">[ Selected projects ]</p>
-          <h2>BUILT TO<br /><span>SHIP.</span></h2>
-          <p>A selection of agents, experiments, infrastructure, and interactive work from my open-source lab.</p>
-        </div>
-        <div className="project-list">
-          {projects.map((project) => (
-            <a key={project.name} className="project-row" href={project.href} target="_blank" rel="noreferrer">
-              <span className="project-number">{project.number}</span>
-              <div><p>{project.tag}</p><h3>{project.name}</h3></div>
-              <p className="project-description">{project.description}</p>
-              <span className="project-arrow"><ArrowUpRight /></span>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      <section className="stack-section">
-        <p className="section-label">[ Toolkit ]</p>
-        <div className="stack-marquee">{[...stack, ...stack].map((item, i) => <span key={`${item}-${i}`}>{item}<b>✦</b></span>)}</div>
-      </section>
-
-      <footer>
-        <div className="footer-top"><p>Have a difficult idea?</p><a href="https://github.com/espinosacodes" target="_blank" rel="noreferrer">LET&apos;S BUILD IT <ArrowUpRight /></a></div>
-        <div className="footer-bottom"><span>© 2026 Santiago Espinosa</span><span>Cali, Colombia</span><a href="https://github.com/espinosacodes" target="_blank" rel="noreferrer"><Github size={17} /> espinosacodes</a></div>
-      </footer>
-    </main>
-  )
+    <section className="v2-quote"><p>It doesn&apos;t matter where<br />you start, it&apos;s how you<br /><strong>progress</strong> from there.</p><span className="v2-signature">espinosa codes</span></section>
+    <footer className="v2-footer"><h2>KEEP<br />BUILDING.</h2><div><span>© 2026 Santiago Espinosa</span><a href="https://github.com/espinosacodes" target="_blank" rel="noreferrer"><Github /> GitHub</a><span>Cali, Colombia</span></div></footer>
+  </main>
 }
