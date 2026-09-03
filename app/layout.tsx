@@ -6,6 +6,8 @@ import SmoothScroll from "@/components/smooth-scroll"
 import Preloader from "@/components/preloader"
 import "./globals.css"
 
+const siteBasePath = process.env.GITHUB_ACTIONS === "true" ? "/portfolio" : ""
+
 const roboto = Roboto({
   weight: ["300", "400", "500", "700", "900"],
   subsets: ["latin"],
@@ -42,24 +44,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Santiago Espinosa — Software & AI Engineer",
     description: "Selected software, AI agents, infrastructure, and interactive work by espinosacodes.",
-    images: ["/pfp/santiago.jpg"],
+    images: ["https://espinosacodes.github.io/portfolio/pfp/santiago.jpg"],
   },
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
+        url: `${siteBasePath}/icon-light-32x32.png`,
         media: "(prefers-color-scheme: light)",
       },
       {
-        url: "/icon-dark-32x32.png",
+        url: `${siteBasePath}/icon-dark-32x32.png`,
         media: "(prefers-color-scheme: dark)",
       },
       {
-        url: "/icon.svg",
+        url: `${siteBasePath}/icon.svg`,
         type: "image/svg+xml",
       },
     ],
-    apple: "/apple-icon.png",
+    apple: `${siteBasePath}/apple-icon.png`,
   },
 }
 

@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import portrait from "@/public/pfp/santiago.jpg"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowDownRight, ArrowUpRight, Github, MapPin, Sparkles } from "lucide-react"
 
@@ -32,7 +33,7 @@ export default function Home() {
         <motion.h1 style={{ x: titleX }}>SANTIAGO<span>ESPINOSA</span></motion.h1>
         <motion.div className="portrait-frame" style={{ y: portraitY }}>
           <div className="portrait-index">001 / CO</div>
-          <Image src="/pfp/santiago.jpg" alt="Santiago Espinosa" fill priority sizes="(max-width: 768px) 76vw, 36vw" />
+          <Image src={portrait} alt="Santiago Espinosa" fill priority sizes="(max-width: 768px) 76vw, 36vw" />
           <div className="portrait-glow" />
         </motion.div>
         <p className="hero-intro">I build intelligent products, autonomous agents, and expressive digital experiences from Colombia to the world.</p>
