@@ -1,18 +1,20 @@
 "use client"
 
 import Image, { type StaticImageData } from "next/image"
+import dynamic from "next/dynamic"
 import { useEffect, useRef, useState } from "react"
 import { motion, useMotionValue, useSpring } from "framer-motion"
 import Lenis from "lenis"
 import { ArrowDown, ArrowUpRight, Github, Menu, X } from "lucide-react"
 import hero from "@/public/portfolio-v2/santiago-hero.png"
-import heroExo from "@/public/portfolio-v2/santiago-exoskeleton.png"
 import dreamjobDiagram from "@/public/portfolio-v2/dreamjob-architecture.svg"
 import cataraDiagram from "@/public/portfolio-v2/catara-architecture.svg"
 import talktown from "@/public/portfolio-v2/talktown.png"
 import hackathon from "@/public/portfolio-v2/hackathon.png"
 import freeticket from "@/public/portfolio-v2/freeticket.png"
 import "./portfolio-v2.css"
+
+const ExoskeletonScene = dynamic(() => import("@/components/exoskeleton-scene"), { ssr: false })
 
 type Project = { title: string; date: string; description: string; image: StaticImageData; href: string; live?: string; kind: string }
 const projects: Project[] = [
@@ -129,11 +131,10 @@ export default function Home() {
       <div className="v2-orbit v2-orbit-one" />
       <div className="v2-orbit v2-orbit-two" />
       <div className="v2-tech-ring v2-tech-ring-a" /><div className="v2-tech-ring v2-tech-ring-b" />
-      <motion.div className="v2-face" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.25, delay: .15, ease: [.16,1,.3,1] }}>
+      <div className="v2-face">
         <Image className="v2-base-person" src={hero} alt="Santiago Espinosa" fill priority sizes="(max-width: 800px) 120vw, 74vw" />
-        <Image className="v2-exo-ghost" src={heroExo} alt="" fill priority aria-hidden="true" sizes="(max-width: 800px) 120vw, 74vw" />
-        <Image className="v2-exo-reveal" src={heroExo} alt="Santiago Espinosa wearing a futuristic engineering exoskeleton" fill priority sizes="(max-width: 800px) 120vw, 74vw" />
-      </motion.div>
+        <div className="v2-exo-webgl" aria-label="Interactive three-dimensional engineering exoskeleton"><ExoskeletonScene /></div>
+      </div>
       <div className="v2-hero-status"><i /> INTERACTIVE SYSTEM ONLINE</div>
       <div className="v2-latest"><span>LATEST BUILD</span><a href="https://github.com/espinosacodes/dreamJob" target="_blank" rel="noreferrer" data-cursor="OPEN"><Image src={dreamjobDiagram} alt="DreamJob system architecture" fill sizes="150px" /><b>DreamJob</b></a></div>
       <a href="#projects" className="v2-down" aria-label="View projects"><ArrowDown /></a>
