@@ -7,8 +7,9 @@ import { motion, useMotionValue, useSpring } from "framer-motion"
 import Lenis from "lenis"
 import { ArrowDown, ArrowUpRight, Github, Menu, X } from "lucide-react"
 import hero from "@/public/portfolio-v2/santiago-hero.png"
-import dreamjobDiagram from "@/public/portfolio-v2/dreamjob-architecture.svg"
-import cataraDiagram from "@/public/portfolio-v2/catara-architecture.svg"
+import dreamjobDiagram from "@/public/portfolio-v2/dreamjob-cloudcraft.png"
+import cataraDiagram from "@/public/portfolio-v2/catara-cloudcraft.png"
+import talktownDiagram from "@/public/portfolio-v2/talktown-cloudcraft.svg"
 import talktown from "@/public/portfolio-v2/talktown.png"
 import hackathon from "@/public/portfolio-v2/hackathon.png"
 import freeticket from "@/public/portfolio-v2/freeticket.png"
@@ -16,11 +17,11 @@ import "./portfolio-v2.css"
 
 const ExoskeletonScene = dynamic(() => import("@/components/exoskeleton-scene"), { ssr: false })
 
-type Project = { title: string; date: string; description: string; image: StaticImageData; href: string; live?: string; kind: string }
+type Project = { title: string; date: string; description: string; image: StaticImageData; livePreview?: StaticImageData; href: string; live?: string; kind: string }
 const projects: Project[] = [
   { title: "DreamJob", date: "August, 2026", description: "A phone-first job engine with a Go service, deterministic Rust core, Flutter client, and human-gated browser agent.", image: dreamjobDiagram, href: "https://github.com/espinosacodes/dreamJob", kind: "Architecture / Agent system" },
   { title: "Catara Growth Engine", date: "June, 2026", description: "A multi-tenant LangGraph sales system connecting RAG, channels, webhooks, rate controls, and meeting conversion.", image: cataraDiagram, href: "https://github.com/espinosacodes/catara-growth-engine", kind: "Architecture / AI platform" },
-  { title: "TalkTown", date: "April, 2026", description: "A live social experience designed around conversation, presence, and a playful real-time interface.", image: talktown, href: "https://github.com/espinosacodes/TalkTown", live: "https://talk-town-five.vercel.app", kind: "Live product / TypeScript" },
+  { title: "TalkTown", date: "April, 2026", description: "An AI language-learning RPG on Vercel, orchestrating Gemini and Groq dialogue while DynamoDB preserves the player journey.", image: talktownDiagram, livePreview: talktown, href: "https://github.com/espinosacodes/TalkTown", live: "https://talk-town-five.vercel.app", kind: "Architecture / Live product" },
   { title: "Hackathon Reto 4", date: "June, 2026", description: "A shipped web experience built under hackathon constraints, from idea to a working public product.", image: hackathon, href: "https://github.com/espinosacodes/hackaton-reto4", live: "https://hackaton-reto4.vercel.app", kind: "Live product / JavaScript" },
   { title: "FreeTicket", date: "August, 2026", description: "A browser-based product with a public interface and a direct path from code to user experience.", image: freeticket, href: "https://github.com/espinosacodes/freeticket", live: "https://espinosacodes.github.io/freeticket/", kind: "Live product / JavaScript" },
 ]
@@ -147,7 +148,7 @@ export default function Home() {
     <section id="projects" className="v2-projects">
       {projects.map((project, index) => <article className={`v2-project p${index+1}`} key={project.title}>
         <div className="v2-project-date"><span>{project.title}</span><span>{project.date}</span></div>
-        <a href={project.live || project.href} target="_blank" rel="noreferrer" className="v2-project-image" data-cursor={project.live ? "VISIT" : "CODE"}><Image src={project.image} alt={`${project.title}: ${project.kind}`} fill sizes="(max-width: 800px) 94vw, 76vw" /></a>
+        <a href={project.live || project.href} target="_blank" rel="noreferrer" className={`v2-project-image ${project.livePreview ? "has-preview" : ""}`} data-cursor={project.live ? "VISIT" : "CODE"}><Image className="v2-primary-visual" src={project.image} alt={`${project.title}: ${project.kind}`} fill sizes="(max-width: 800px) 94vw, 76vw" />{project.livePreview && <Image className="v2-live-preview" src={project.livePreview} alt={`${project.title} live homepage`} fill sizes="(max-width: 800px) 94vw, 76vw" />}</a>
         <div className="v2-project-copy"><p>{project.date}</p><h2>{project.title}</h2><p>{project.description}</p><span>{project.kind}</span><div><a href={project.href} target="_blank" rel="noreferrer">Repository <ArrowUpRight /></a>{project.live && <a href={project.live} target="_blank" rel="noreferrer">Live site <ArrowUpRight /></a>}</div></div>
       </article>)}
     </section>

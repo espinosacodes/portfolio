@@ -46,3 +46,9 @@
 @keyframes v2-image-depth{from{scale:1.12;translate:0 -3%}to{scale:1;translate:0 3%}}
 @keyframes v2-quote-drive{from{transform:translateY(12vh) skewY(3deg)}to{transform:translateY(0) skewY(0)}}
 @media(prefers-reduced-motion:reduce){.v2-opening h1,.v2-project-image,.v2-project-image img,.v2-quote>p{animation:none!important}}
+
+/* Architecture-first project cards reveal a deployed homepage on hover. */
+.v2-project-image.has-preview .v2-live-preview{opacity:0;transform:scale(1.045);transition:opacity .55s ease,transform .9s cubic-bezier(.2,.8,.2,1)}
+.v2-project-image.has-preview:hover .v2-primary-visual{opacity:0}
+.v2-project-image.has-preview:hover .v2-live-preview{opacity:1;transform:scale(1)}
+.v2-primary-visual{transition:opacity .45s ease,transform .9s cubic-bezier(.2,.8,.2,1)!important}
