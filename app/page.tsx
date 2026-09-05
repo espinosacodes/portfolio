@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react"
 import { motion, useMotionValue, useSpring } from "framer-motion"
 import Lenis from "lenis"
 import { ArrowDown, ArrowUpRight, Github, Menu, X } from "lucide-react"
-import normalHero from "@/public/portfolio-v2/santiago-hero.png"
-import helmetHero from "@/public/portfolio-v2/santiago-helmet-hero.png"
+import normalHero from "@/public/portfolio-v2/santiago-cutout-v3.png"
+import helmetHero from "@/public/portfolio-v2/santiago-helmet-overlay-v4.png"
 import "./portfolio-v2.css"
 
 type Project = { title: string; date: string; description: string; href: string; live?: string; kind: string }
@@ -38,6 +38,19 @@ function CustomCursor() {
 function HelmetPortrait({ locked }: { locked: boolean }) {
   return <div className={`v2-helmet-portrait ${locked ? "is-locked" : ""}`}>
     <Image className="v2-base-person" src={normalHero} alt="Santiago Espinosa" fill priority sizes="(max-width: 800px) 120vw, 64vw" />
+    <svg className="v2-scan-shell" viewBox="0 0 1122 1402" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <g className="v2-scan-shell-main">
+        <path d="M181 548C141 280 291 61 561 43c270 18 420 237 380 505" />
+        <path d="M213 570c17 197 132 325 348 365 216-40 331-168 348-365" />
+        <path d="M282 352c105-73 453-73 558 0l-27 273c-87 92-417 92-504 0z" />
+        <path d="M561 43v83M561 935v78M181 548h95M846 548h95" />
+      </g>
+      <g className="v2-scan-shell-hot">
+        <path d="M240 298c72-145 179-218 321-221M882 298C810 153 703 80 561 77" />
+        <path d="M309 625c48 85 132 133 252 145 120-12 204-60 252-145" />
+        <circle cx="181" cy="548" r="7" /><circle cx="941" cy="548" r="7" /><circle cx="561" cy="77" r="7" /><circle cx="561" cy="935" r="7" />
+      </g>
+    </svg>
     <div className="v2-helmet-reveal" aria-hidden="true">
       <div className="v2-helmet-media">
         <Image src={helmetHero} alt="" fill priority sizes="(max-width: 800px) 120vw, 64vw" />
