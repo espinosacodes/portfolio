@@ -1,29 +1,20 @@
 "use client"
 
-import Image, { type StaticImageData } from "next/image"
-import dynamic from "next/dynamic"
+import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { motion, useMotionValue, useSpring } from "framer-motion"
 import Lenis from "lenis"
 import { ArrowDown, ArrowUpRight, Github, Menu, X } from "lucide-react"
 import hero from "@/public/portfolio-v2/santiago-hero.png"
-import dreamjobDiagram from "@/public/portfolio-v2/dreamjob-cloudcraft.png"
-import cataraDiagram from "@/public/portfolio-v2/catara-cloudcraft.png"
-import talktownDiagram from "@/public/portfolio-v2/talktown-cloudcraft.svg"
-import talktown from "@/public/portfolio-v2/talktown.png"
-import hackathon from "@/public/portfolio-v2/hackathon.png"
-import freeticket from "@/public/portfolio-v2/freeticket.png"
 import "./portfolio-v2.css"
 
-const ExoskeletonScene = dynamic(() => import("@/components/exoskeleton-scene"), { ssr: false })
-
-type Project = { title: string; date: string; description: string; image: StaticImageData; livePreview?: StaticImageData; href: string; live?: string; kind: string }
+type Project = { title: string; date: string; description: string; href: string; live?: string; kind: string }
 const projects: Project[] = [
-  { title: "DreamJob", date: "August, 2026", description: "A phone-first job engine with a Go service, deterministic Rust core, Flutter client, and human-gated browser agent.", image: dreamjobDiagram, href: "https://github.com/espinosacodes/dreamJob", kind: "Architecture / Agent system" },
-  { title: "Catara Growth Engine", date: "June, 2026", description: "A multi-tenant LangGraph sales system connecting RAG, channels, webhooks, rate controls, and meeting conversion.", image: cataraDiagram, href: "https://github.com/espinosacodes/catara-growth-engine", kind: "Architecture / AI platform" },
-  { title: "TalkTown", date: "April, 2026", description: "An AI language-learning RPG on Vercel, orchestrating Gemini and Groq dialogue while DynamoDB preserves the player journey.", image: talktownDiagram, livePreview: talktown, href: "https://github.com/espinosacodes/TalkTown", live: "https://talk-town-five.vercel.app", kind: "Architecture / Live product" },
-  { title: "Hackathon Reto 4", date: "June, 2026", description: "A shipped web experience built under hackathon constraints, from idea to a working public product.", image: hackathon, href: "https://github.com/espinosacodes/hackaton-reto4", live: "https://hackaton-reto4.vercel.app", kind: "Live product / JavaScript" },
-  { title: "FreeTicket", date: "August, 2026", description: "A browser-based product with a public interface and a direct path from code to user experience.", image: freeticket, href: "https://github.com/espinosacodes/freeticket", live: "https://espinosacodes.github.io/freeticket/", kind: "Live product / JavaScript" },
+  { title: "DreamJob", date: "August, 2026", description: "A phone-first job engine with a Go service, deterministic Rust core, Flutter client, and human-gated browser agent.", href: "https://github.com/espinosacodes/dreamJob", kind: "Architecture / Agent system" },
+  { title: "Catara Growth Engine", date: "June, 2026", description: "A multi-tenant LangGraph sales system connecting RAG, channels, webhooks, rate controls, and meeting conversion.", href: "https://github.com/espinosacodes/catara-growth-engine", kind: "Architecture / AI platform" },
+  { title: "TalkTown", date: "April, 2026", description: "An AI language-learning RPG on Vercel, orchestrating Gemini and Groq dialogue while DynamoDB preserves the player journey.", href: "https://github.com/espinosacodes/TalkTown", live: "https://talk-town-five.vercel.app", kind: "Architecture / Live product" },
+  { title: "Hackathon Reto 4", date: "June, 2026", description: "A shipped web experience built under hackathon constraints, from idea to a working public product.", href: "https://github.com/espinosacodes/hackaton-reto4", live: "https://hackaton-reto4.vercel.app", kind: "Live product / JavaScript" },
+  { title: "FreeTicket", date: "August, 2026", description: "A browser-based product with a public interface and a direct path from code to user experience.", href: "https://github.com/espinosacodes/freeticket", live: "https://espinosacodes.github.io/freeticket/", kind: "Live product / JavaScript" },
 ]
 
 function CustomCursor() {
@@ -43,55 +34,45 @@ function CustomCursor() {
   return <motion.div className={`v2-cursor ${label ? "is-active" : ""}`} style={{ x: sx, y: sy }}>{label}</motion.div>
 }
 
-function LiquidTrail() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const context = canvas.getContext("2d")
-    if (!context) return
-    let frame = 0
-    let pointer = { x: innerWidth / 2, y: innerHeight / 2 }
-    const trail = Array.from({ length: 14 }, () => ({ ...pointer }))
-    const resize = () => {
-      const dpr = Math.min(devicePixelRatio, 2)
-      canvas.width = innerWidth * dpr
-      canvas.height = innerHeight * dpr
-      canvas.style.width = `${innerWidth}px`
-      canvas.style.height = `${innerHeight}px`
-      context.setTransform(dpr, 0, 0, dpr, 0, 0)
-    }
-    const move = (event: PointerEvent) => { pointer = { x: event.clientX, y: event.clientY } }
-    const draw = () => {
-      context.clearRect(0, 0, innerWidth, innerHeight)
-      trail[0].x += (pointer.x - trail[0].x) * .2
-      trail[0].y += (pointer.y - trail[0].y) * .2
-      for (let i = 1; i < trail.length; i++) {
-        trail[i].x += (trail[i - 1].x - trail[i].x) * (.25 - i * .006)
-        trail[i].y += (trail[i - 1].y - trail[i].y) * (.25 - i * .006)
-      }
-      context.globalCompositeOperation = "lighter"
-      trail.forEach((point, i) => {
-        const radius = 26 - i * 1.35
-        const gradient = context.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius)
-        gradient.addColorStop(0, `rgba(255,26,77,${.12 - i * .005})`)
-        gradient.addColorStop(1, "rgba(255,26,77,0)")
-        context.fillStyle = gradient
-        context.beginPath(); context.arc(point.x, point.y, radius, 0, Math.PI * 2); context.fill()
-      })
-      frame = requestAnimationFrame(draw)
-    }
-    resize(); draw()
-    window.addEventListener("resize", resize)
-    window.addEventListener("pointermove", move, { passive: true })
-    return () => { cancelAnimationFrame(frame); window.removeEventListener("resize", resize); window.removeEventListener("pointermove", move) }
-  }, [])
-  return <canvas className="v2-liquid-trail" ref={canvasRef} aria-hidden="true" />
+function PortraitOverlay({ locked }: { locked: boolean }) {
+  return <div className={`v2-portrait-overlay ${locked ? "is-locked" : ""}`} aria-hidden="true">
+    <Image className="v2-overlay-person" src={hero} alt="" fill priority sizes="(max-width: 800px) 120vw, 62vw" />
+    <div className="v2-overlay-grid" />
+    <svg className="v2-anatomy" viewBox="0 0 1122 1402" preserveAspectRatio="xMidYMax meet">
+      <g className="v2-anatomy-muted">
+        <path d="M291 280C312 130 421 53 561 53s249 77 270 227" />
+        <path d="M357 320c8-124 83-213 204-213s196 89 204 213" />
+        <path d="M385 307c-24 104-13 248 31 324 35 61 92 107 145 107s110-46 145-107c44-76 55-220 31-324" />
+        <path d="M420 708l-18 104M702 708l18 104M402 812c48 47 101 70 159 70s111-23 159-70" />
+        <path d="M561 766v566M561 870c-164 7-283 62-365 159M561 870c164 7 283 62 365 159" />
+        <path d="M561 934c-125 0-217 35-274 91M561 934c125 0 217 35 274 91" />
+        <path d="M561 1003c-111 0-191 31-241 78M561 1003c111 0 191 31 241 78" />
+        <path d="M561 1072c-94 0-163 27-207 68M561 1072c94 0 163 27 207 68" />
+        <path d="M561 1141c-77 0-134 22-170 57M561 1141c77 0 134 22 170 57" />
+      </g>
+      <g className="v2-anatomy-hot">
+        <path d="M322 298c72-20 151-28 239-28s167 8 239 28" />
+        <path d="M365 344h161l35 43 35-43h161" />
+        <path d="M391 450c94 35 246 35 340 0" />
+        <path d="M561 387v183l-34 33h68l-34-33" />
+        <path d="M483 650c48 23 108 23 156 0" />
+        <path d="M561 766v566" />
+      </g>
+      <g className="v2-anatomy-nodes">
+        <circle cx="357" cy="320" r="8" /><circle cx="765" cy="320" r="8" />
+        <circle cx="561" cy="387" r="10" /><circle cx="561" cy="766" r="9" />
+        <circle cx="402" cy="812" r="8" /><circle cx="720" cy="812" r="8" />
+        <circle cx="561" cy="934" r="8" /><circle cx="561" cy="1072" r="8" />
+      </g>
+    </svg>
+    <div className="v2-overlay-data"><span>SE / BIO-SCAN</span><span>PORTRAIT LAYER 02</span></div>
+    <div className="v2-reveal-contour" />
+  </div>
 }
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [helmetLocked, setHelmetLocked] = useState(false)
+  const [scanLocked, setScanLocked] = useState(false)
   const heroSection = useRef<HTMLElement>(null)
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.15, smoothWheel: true })
@@ -128,18 +109,17 @@ export default function Home() {
     {menuOpen && <nav className="v2-menu"><a href="#projects" onClick={() => setMenuOpen(false)}>Projects</a><a href="#manifesto" onClick={() => setMenuOpen(false)}>About</a><a href="https://github.com/espinosacodes" target="_blank" rel="noreferrer">GitHub</a></nav>}
 
     <section id="home" className="v2-hero" ref={heroSection}>
-      <LiquidTrail />
       <div className="v2-tracklines" />
       <div className="v2-orbit v2-orbit-one" />
       <div className="v2-orbit v2-orbit-two" />
       <div className="v2-tech-ring v2-tech-ring-a" /><div className="v2-tech-ring v2-tech-ring-b" />
       <div className="v2-face">
-        <Image className="v2-base-person" src={hero} alt="Santiago Espinosa" fill priority sizes="(max-width: 800px) 120vw, 74vw" />
-        <div className="v2-exo-webgl" aria-label="Interactive three-dimensional engineering exoskeleton"><ExoskeletonScene locked={helmetLocked} /></div>
+        <Image className="v2-base-person" src={hero} alt="Santiago Espinosa" fill priority sizes="(max-width: 800px) 120vw, 62vw" />
+        <PortraitOverlay locked={scanLocked} />
       </div>
-      <button className={`v2-lock-control ${helmetLocked ? "is-locked" : ""}`} onClick={() => setHelmetLocked(value => !value)} aria-pressed={helmetLocked} data-cursor={helmetLocked ? "FREE" : "LOCK"}><span>{helmetLocked ? "RELEASE EXO" : "LOCK EXO"}</span><i /></button>
+      <button className={`v2-lock-control ${scanLocked ? "is-locked" : ""}`} onClick={() => setScanLocked(value => !value)} aria-pressed={scanLocked} data-cursor={scanLocked ? "FREE" : "LOCK"}><span>{scanLocked ? "RELEASE SCAN" : "LOCK SCAN"}</span><i /></button>
       <div className="v2-hero-status"><i /> INTERACTIVE SYSTEM ONLINE</div>
-      <div className="v2-latest"><span>LATEST BUILD</span><a href="https://github.com/espinosacodes/dreamJob" target="_blank" rel="noreferrer" data-cursor="OPEN"><Image src={dreamjobDiagram} alt="DreamJob system architecture" fill sizes="150px" /><b>DreamJob</b></a></div>
+      <div className="v2-latest"><span>LATEST BUILD</span><a href="https://github.com/espinosacodes/dreamJob" target="_blank" rel="noreferrer" data-cursor="OPEN"><div className="v2-latest-placeholder"><span>ARCH</span><i /></div><b>DreamJob</b></a></div>
       <a href="#projects" className="v2-down" aria-label="View projects"><ArrowDown /></a>
     </section>
 
@@ -148,7 +128,14 @@ export default function Home() {
     <section id="projects" className="v2-projects">
       {projects.map((project, index) => <article className={`v2-project p${index+1}`} key={project.title}>
         <div className="v2-project-date"><span>{project.title}</span><span>{project.date}</span></div>
-        <a href={project.live || project.href} target="_blank" rel="noreferrer" className={`v2-project-image ${project.livePreview ? "has-preview" : ""}`} data-cursor={project.live ? "VISIT" : "CODE"}><Image className="v2-primary-visual" src={project.image} alt={`${project.title}: ${project.kind}`} fill sizes="(max-width: 800px) 94vw, 76vw" />{project.livePreview && <Image className="v2-live-preview" src={project.livePreview} alt={`${project.title} live homepage`} fill sizes="(max-width: 800px) 94vw, 76vw" />}</a>
+        <a href={project.live || project.href} target="_blank" rel="noreferrer" className="v2-project-image" data-cursor={project.live ? "VISIT" : "CODE"} aria-label={`Open ${project.title}`}>
+          <div className="v2-project-placeholder">
+            <span>{String(index + 1).padStart(2, "0")} / ARCHITECTURE</span>
+            <strong>{project.title}</strong>
+            <em>DIAGRAM PLACEHOLDER</em>
+            <i />
+          </div>
+        </a>
         <div className="v2-project-copy"><p>{project.date}</p><h2>{project.title}</h2><p>{project.description}</p><span>{project.kind}</span><div><a href={project.href} target="_blank" rel="noreferrer">Repository <ArrowUpRight /></a>{project.live && <a href={project.live} target="_blank" rel="noreferrer">Live site <ArrowUpRight /></a>}</div></div>
       </article>)}
     </section>
