@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { motion, useMotionValue, useSpring } from "framer-motion"
 import Lenis from "lenis"
 import { ArrowDown, ArrowUpRight, Github, Menu, X } from "lucide-react"
-import normalHero from "@/public/portfolio-v2/santiago-cutout-v3.png"
+import normalHero from "@/public/portfolio-v2/santiago-hero.png"
 import helmetHero from "@/public/portfolio-v2/santiago-helmet-overlay-v4.png"
 import "./portfolio-v2.css"
 
@@ -83,21 +83,40 @@ export default function Home() {
   useEffect(() => {
     const section = heroSection.current
     if (!section) return
+    const portrait = section.querySelector<HTMLElement>(".v2-face")
+    if (!portrait) return
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    let lastPointerMove = Number.NEGATIVE_INFINITY
+    let idleFrame = 0
+    const setRevealPosition = (x: number, y: number) => {
+      portrait.style.setProperty("--fx", `${x}px`)
+      portrait.style.setProperty("--fy", `${y}px`)
+    }
     const move = (event: PointerEvent) => {
+      lastPointerMove = performance.now()
       section.classList.add("is-pointer-active")
+      section.classList.remove("is-idle-flow")
       section.style.setProperty("--mx", `${event.clientX / window.innerWidth - .5}`)
       section.style.setProperty("--my", `${event.clientY / window.innerHeight - .5}`)
       section.style.setProperty("--px", `${event.clientX}px`)
       section.style.setProperty("--py", `${event.clientY}px`)
-      const portrait = section.querySelector<HTMLElement>(".v2-face")
-      if (portrait) {
-        const bounds = portrait.getBoundingClientRect()
-        portrait.style.setProperty("--fx", `${event.clientX - bounds.left}px`)
-        portrait.style.setProperty("--fy", `${event.clientY - bounds.top}px`)
-      }
+      const bounds = portrait.getBoundingClientRect()
+      setRevealPosition(event.clientX - bounds.left, event.clientY - bounds.top)
     }
+    const idleFlow = (time: number) => {
+      if (time - lastPointerMove > 900) {
+        const x = portrait.clientWidth * (.5 + Math.sin(time * .00042) * .2 + Math.sin(time * .00091) * .035)
+        const y = portrait.clientHeight * (.4 + Math.cos(time * .00036) * .12 + Math.sin(time * .00073) * .035)
+        setRevealPosition(x, y)
+        section.classList.add("is-pointer-active", "is-idle-flow")
+      }
+      idleFrame = requestAnimationFrame(idleFlow)
+    }
+    section.classList.add("is-pointer-active")
+    setRevealPosition(portrait.clientWidth * .5, portrait.clientHeight * .4)
     window.addEventListener("pointermove", move, { passive: true })
-    return () => window.removeEventListener("pointermove", move)
+    if (!reducedMotion) idleFrame = requestAnimationFrame(idleFlow)
+    return () => { cancelAnimationFrame(idleFrame); window.removeEventListener("pointermove", move) }
   }, [])
   return <main className="v2-site">
     <CustomCursor />
