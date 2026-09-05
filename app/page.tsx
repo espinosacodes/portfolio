@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { motion, useMotionValue, useSpring } from "framer-motion"
 import Lenis from "lenis"
 import { ArrowDown, ArrowUpRight, Github, Menu, X } from "lucide-react"
+import normalHero from "@/public/portfolio-v2/santiago-hero.png"
 import helmetHero from "@/public/portfolio-v2/santiago-helmet-hero.png"
 import "./portfolio-v2.css"
 
@@ -34,28 +35,30 @@ function CustomCursor() {
   return <motion.div className={`v2-cursor ${label ? "is-active" : ""}`} style={{ x: sx, y: sy }}>{label}</motion.div>
 }
 
-function HelmetPortrait({ held }: { held: boolean }) {
-  return <div className={`v2-helmet-portrait ${held ? "is-held" : ""}`}>
-    <Image className="v2-base-person" src={helmetHero} alt="Santiago Espinosa wearing a black and red racing helmet" fill priority sizes="(max-width: 800px) 112vw, 64vw" />
-    <div className="v2-helmet-refraction" aria-hidden="true">
-      <Image src={helmetHero} alt="" fill priority sizes="(max-width: 800px) 112vw, 64vw" />
+function HelmetPortrait({ locked }: { locked: boolean }) {
+  return <div className={`v2-helmet-portrait ${locked ? "is-locked" : ""}`}>
+    <Image className="v2-base-person" src={normalHero} alt="Santiago Espinosa" fill priority sizes="(max-width: 800px) 120vw, 64vw" />
+    <div className="v2-helmet-reveal" aria-hidden="true">
+      <div className="v2-helmet-media">
+        <Image src={helmetHero} alt="" fill priority sizes="(max-width: 800px) 120vw, 64vw" />
+        <div className="v2-helmet-fluid"><i /><i /><i /></div>
+        <svg className="v2-helmet-hud" viewBox="0 0 1122 1402" preserveAspectRatio="xMidYMid meet">
+          <path d="M214 433C237 207 368 83 561 78c193 5 324 129 347 355" />
+          <path d="M229 654c40 196 163 308 332 312 169-4 292-116 332-312" />
+          <path d="M192 511h106M824 511h106M561 50v95M561 909v96" />
+          <circle cx="561" cy="514" r="405" />
+          <circle cx="561" cy="514" r="8" className="v2-hud-node" />
+        </svg>
+        <div className="v2-helmet-data"><span>SE / H-01</span><span>LIQUID SHELL</span></div>
+      </div>
     </div>
-    <div className="v2-helmet-fluid" aria-hidden="true"><i /><i /><i /></div>
     <div className="v2-helmet-ripple" aria-hidden="true" />
-    <svg className="v2-helmet-hud" viewBox="0 0 1122 1402" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-      <path d="M214 433C237 207 368 83 561 78c193 5 324 129 347 355" />
-      <path d="M229 654c40 196 163 308 332 312 169-4 292-116 332-312" />
-      <path d="M192 511h106M824 511h106M561 50v95M561 909v96" />
-      <circle cx="561" cy="514" r="405" />
-      <circle cx="561" cy="514" r="8" className="v2-hud-node" />
-    </svg>
-    <div className="v2-helmet-data" aria-hidden="true"><span>SE / H-01</span><span>LIQUID SHELL</span></div>
   </div>
 }
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [surfaceHeld, setSurfaceHeld] = useState(false)
+  const [helmetLocked, setHelmetLocked] = useState(false)
   const heroSection = useRef<HTMLElement>(null)
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.15, smoothWheel: true })
@@ -68,6 +71,7 @@ export default function Home() {
     const section = heroSection.current
     if (!section) return
     const move = (event: PointerEvent) => {
+      section.classList.add("is-pointer-active")
       section.style.setProperty("--mx", `${event.clientX / window.innerWidth - .5}`)
       section.style.setProperty("--my", `${event.clientY / window.innerHeight - .5}`)
       section.style.setProperty("--px", `${event.clientX}px`)
@@ -97,10 +101,10 @@ export default function Home() {
       <div className="v2-orbit v2-orbit-two" />
       <div className="v2-tech-ring v2-tech-ring-a" /><div className="v2-tech-ring v2-tech-ring-b" />
       <div className="v2-face">
-        <HelmetPortrait held={surfaceHeld} />
+        <HelmetPortrait locked={helmetLocked} />
       </div>
-      <button className={`v2-lock-control ${surfaceHeld ? "is-locked" : ""}`} onClick={() => setSurfaceHeld(value => !value)} aria-pressed={surfaceHeld} data-cursor={surfaceHeld ? "FLOW" : "HOLD"}><span>{surfaceHeld ? "RELEASE FLOW" : "HOLD SURFACE"}</span><i /></button>
-      <div className="v2-hero-status"><i /> LIQUID SYSTEM ONLINE</div>
+      <button className={`v2-lock-control ${helmetLocked ? "is-locked" : ""}`} onClick={() => setHelmetLocked(value => !value)} aria-pressed={helmetLocked} data-cursor={helmetLocked ? "FREE" : "LOCK"}><span>{helmetLocked ? "RELEASE HELMET" : "LOCK HELMET"}</span><i /></button>
+      <div className="v2-hero-status"><i /> MOVE CURSOR TO REVEAL</div>
       <div className="v2-latest"><span>LATEST BUILD</span><a href="https://github.com/espinosacodes/dreamJob" target="_blank" rel="noreferrer" data-cursor="OPEN"><div className="v2-latest-placeholder"><span>ARCH</span><i /></div><b>DreamJob</b></a></div>
       <a href="#projects" className="v2-down" aria-label="View projects"><ArrowDown /></a>
     </section>
