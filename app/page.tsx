@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { motion, useMotionValue, useSpring } from "framer-motion"
 import Lenis from "lenis"
 import { ArrowDown, ArrowUpRight, Github, Menu, X } from "lucide-react"
-import hero from "@/public/portfolio-v2/santiago-hero.png"
+import helmetHero from "@/public/portfolio-v2/santiago-helmet-hero.png"
 import "./portfolio-v2.css"
 
 type Project = { title: string; date: string; description: string; href: string; live?: string; kind: string }
@@ -34,45 +34,28 @@ function CustomCursor() {
   return <motion.div className={`v2-cursor ${label ? "is-active" : ""}`} style={{ x: sx, y: sy }}>{label}</motion.div>
 }
 
-function PortraitOverlay({ locked }: { locked: boolean }) {
-  return <div className={`v2-portrait-overlay ${locked ? "is-locked" : ""}`} aria-hidden="true">
-    <Image className="v2-overlay-person" src={hero} alt="" fill priority sizes="(max-width: 800px) 120vw, 62vw" />
-    <div className="v2-overlay-grid" />
-    <svg className="v2-anatomy" viewBox="0 0 1122 1402" preserveAspectRatio="xMidYMax meet">
-      <g className="v2-anatomy-muted">
-        <path d="M291 280C312 130 421 53 561 53s249 77 270 227" />
-        <path d="M357 320c8-124 83-213 204-213s196 89 204 213" />
-        <path d="M385 307c-24 104-13 248 31 324 35 61 92 107 145 107s110-46 145-107c44-76 55-220 31-324" />
-        <path d="M420 708l-18 104M702 708l18 104M402 812c48 47 101 70 159 70s111-23 159-70" />
-        <path d="M561 766v566M561 870c-164 7-283 62-365 159M561 870c164 7 283 62 365 159" />
-        <path d="M561 934c-125 0-217 35-274 91M561 934c125 0 217 35 274 91" />
-        <path d="M561 1003c-111 0-191 31-241 78M561 1003c111 0 191 31 241 78" />
-        <path d="M561 1072c-94 0-163 27-207 68M561 1072c94 0 163 27 207 68" />
-        <path d="M561 1141c-77 0-134 22-170 57M561 1141c77 0 134 22 170 57" />
-      </g>
-      <g className="v2-anatomy-hot">
-        <path d="M322 298c72-20 151-28 239-28s167 8 239 28" />
-        <path d="M365 344h161l35 43 35-43h161" />
-        <path d="M391 450c94 35 246 35 340 0" />
-        <path d="M561 387v183l-34 33h68l-34-33" />
-        <path d="M483 650c48 23 108 23 156 0" />
-        <path d="M561 766v566" />
-      </g>
-      <g className="v2-anatomy-nodes">
-        <circle cx="357" cy="320" r="8" /><circle cx="765" cy="320" r="8" />
-        <circle cx="561" cy="387" r="10" /><circle cx="561" cy="766" r="9" />
-        <circle cx="402" cy="812" r="8" /><circle cx="720" cy="812" r="8" />
-        <circle cx="561" cy="934" r="8" /><circle cx="561" cy="1072" r="8" />
-      </g>
+function HelmetPortrait({ held }: { held: boolean }) {
+  return <div className={`v2-helmet-portrait ${held ? "is-held" : ""}`}>
+    <Image className="v2-base-person" src={helmetHero} alt="Santiago Espinosa wearing a black and red racing helmet" fill priority sizes="(max-width: 800px) 112vw, 64vw" />
+    <div className="v2-helmet-refraction" aria-hidden="true">
+      <Image src={helmetHero} alt="" fill priority sizes="(max-width: 800px) 112vw, 64vw" />
+    </div>
+    <div className="v2-helmet-fluid" aria-hidden="true"><i /><i /><i /></div>
+    <div className="v2-helmet-ripple" aria-hidden="true" />
+    <svg className="v2-helmet-hud" viewBox="0 0 1122 1402" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <path d="M214 433C237 207 368 83 561 78c193 5 324 129 347 355" />
+      <path d="M229 654c40 196 163 308 332 312 169-4 292-116 332-312" />
+      <path d="M192 511h106M824 511h106M561 50v95M561 909v96" />
+      <circle cx="561" cy="514" r="405" />
+      <circle cx="561" cy="514" r="8" className="v2-hud-node" />
     </svg>
-    <div className="v2-overlay-data"><span>SE / BIO-SCAN</span><span>PORTRAIT LAYER 02</span></div>
-    <div className="v2-reveal-contour" />
+    <div className="v2-helmet-data" aria-hidden="true"><span>SE / H-01</span><span>LIQUID SHELL</span></div>
   </div>
 }
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [scanLocked, setScanLocked] = useState(false)
+  const [surfaceHeld, setSurfaceHeld] = useState(false)
   const heroSection = useRef<HTMLElement>(null)
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.15, smoothWheel: true })
@@ -114,11 +97,10 @@ export default function Home() {
       <div className="v2-orbit v2-orbit-two" />
       <div className="v2-tech-ring v2-tech-ring-a" /><div className="v2-tech-ring v2-tech-ring-b" />
       <div className="v2-face">
-        <Image className="v2-base-person" src={hero} alt="Santiago Espinosa" fill priority sizes="(max-width: 800px) 120vw, 62vw" />
-        <PortraitOverlay locked={scanLocked} />
+        <HelmetPortrait held={surfaceHeld} />
       </div>
-      <button className={`v2-lock-control ${scanLocked ? "is-locked" : ""}`} onClick={() => setScanLocked(value => !value)} aria-pressed={scanLocked} data-cursor={scanLocked ? "FREE" : "LOCK"}><span>{scanLocked ? "RELEASE SCAN" : "LOCK SCAN"}</span><i /></button>
-      <div className="v2-hero-status"><i /> INTERACTIVE SYSTEM ONLINE</div>
+      <button className={`v2-lock-control ${surfaceHeld ? "is-locked" : ""}`} onClick={() => setSurfaceHeld(value => !value)} aria-pressed={surfaceHeld} data-cursor={surfaceHeld ? "FLOW" : "HOLD"}><span>{surfaceHeld ? "RELEASE FLOW" : "HOLD SURFACE"}</span><i /></button>
+      <div className="v2-hero-status"><i /> LIQUID SYSTEM ONLINE</div>
       <div className="v2-latest"><span>LATEST BUILD</span><a href="https://github.com/espinosacodes/dreamJob" target="_blank" rel="noreferrer" data-cursor="OPEN"><div className="v2-latest-placeholder"><span>ARCH</span><i /></div><b>DreamJob</b></a></div>
       <a href="#projects" className="v2-down" aria-label="View projects"><ArrowDown /></a>
     </section>
