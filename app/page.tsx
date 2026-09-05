@@ -35,6 +35,123 @@ function CustomCursor() {
   return <motion.div className={`v2-cursor ${label ? "is-active" : ""}`} style={{ x: sx, y: sy }}>{label}</motion.div>
 }
 
+type SprayPoint = { x: number; y: number; born: number; phase: number }
+type SprayDrop = { x: number; y: number; vx: number; vy: number; born: number; life: number; radius: number }
+
+function LiquidSpray() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const context = canvas?.getContext("2d")
+    if (!canvas || !context || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    const trail: SprayPoint[] = []
+    const drops: SprayDrop[] = []
+    let previous = { x: 0, y: 0, ready: false }
+    let sequence = 0
+    let frame = 0
+    let width = 0
+    let height = 0
+    let dpr = 1
+    const resize = () => {
+      width = canvas.clientWidth
+      height = canvas.clientHeight
+      dpr = Math.min(window.devicePixelRatio || 1, 2)
+      canvas.width = Math.round(width * dpr)
+      canvas.height = Math.round(height * dpr)
+      context.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
+    const move = (event: PointerEvent) => {
+      const bounds = canvas.getBoundingClientRect()
+      const x = event.clientX - bounds.left
+      const y = event.clientY - bounds.top
+      if (x < 0 || y < 0 || x > bounds.width || y > bounds.height) { previous.ready = false; return }
+      const now = performance.now()
+      if (!previous.ready) { trail.length = 0; previous = { x, y, ready: true } }
+      const dx = x - previous.x
+      const dy = y - previous.y
+      const distance = Math.hypot(dx, dy)
+      const steps = Math.max(1, Math.min(8, Math.ceil(distance / 12)))
+      for (let step = 1; step <= steps; step++) {
+        const progress = step / steps
+        sequence += 1
+        trail.push({ x: previous.x + dx * progress, y: previous.y + dy * progress, born: now, phase: sequence * 1.73 })
+      }
+      if (distance > 5) {
+        const speed = Math.min(distance, 42)
+        const angle = Math.atan2(dy, dx)
+        const normalX = -Math.sin(angle)
+        const normalY = Math.cos(angle)
+        const count = Math.min(5, Math.ceil(distance / 14))
+        for (let index = 0; index < count; index++) {
+          const side = index % 2 ? -1 : 1
+          drops.push({
+            x: x + normalX * side * (5 + index * 2),
+            y: y + normalY * side * (5 + index * 2),
+            vx: Math.cos(angle) * speed * .035 + normalX * side * (1.2 + index * .25),
+            vy: Math.sin(angle) * speed * .035 + normalY * side * (1.2 + index * .25),
+            born: now,
+            life: 720 + index * 115,
+            radius: 1.2 + index * .38,
+          })
+        }
+      }
+      if (trail.length > 110) trail.splice(0, trail.length - 110)
+      if (drops.length > 130) drops.splice(0, drops.length - 130)
+      previous = { x, y, ready: true }
+    }
+    const draw = (now: number) => {
+      context.clearRect(0, 0, width, height)
+      context.lineCap = "round"
+      context.lineJoin = "round"
+      context.globalCompositeOperation = "multiply"
+      while (trail.length && now - trail[0].born > 1450) trail.shift()
+      for (let index = 1; index < trail.length; index++) {
+        const point = trail[index]
+        const before = trail[index - 1]
+        const age = Math.min(1, (now - point.born) / 1450)
+        const dx = point.x - before.x
+        const dy = point.y - before.y
+        const length = Math.max(1, Math.hypot(dx, dy))
+        const normalX = -dy / length
+        const normalY = dx / length
+        const zigzag = Math.sin(point.phase) * (7 + age * 13)
+        const previousZigzag = Math.sin(before.phase) * (7 + age * 13)
+        context.beginPath()
+        context.moveTo(before.x + normalX * previousZigzag, before.y + normalY * previousZigzag)
+        context.lineTo(point.x + normalX * zigzag, point.y + normalY * zigzag)
+        context.strokeStyle = `rgba(255,26,77,${(1 - age) * .42})`
+        context.lineWidth = .8 + (1 - age) * 2.2
+        context.stroke()
+        context.beginPath()
+        context.moveTo(before.x - normalX * previousZigzag * .55, before.y - normalY * previousZigzag * .55)
+        context.lineTo(point.x - normalX * zigzag * .55, point.y - normalY * zigzag * .55)
+        context.strokeStyle = `rgba(37,41,31,${(1 - age) * .18})`
+        context.lineWidth = .65 + (1 - age) * 1.15
+        context.stroke()
+      }
+      for (let index = drops.length - 1; index >= 0; index--) {
+        const drop = drops[index]
+        const age = (now - drop.born) / drop.life
+        if (age >= 1) { drops.splice(index, 1); continue }
+        drop.x += drop.vx
+        drop.y += drop.vy
+        drop.vy += .012
+        context.beginPath()
+        context.arc(drop.x, drop.y, drop.radius * (1 - age * .35), 0, Math.PI * 2)
+        context.fillStyle = `rgba(255,26,77,${(1 - age) * .38})`
+        context.fill()
+      }
+      frame = requestAnimationFrame(draw)
+    }
+    resize()
+    frame = requestAnimationFrame(draw)
+    window.addEventListener("resize", resize)
+    window.addEventListener("pointermove", move, { passive: true })
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("resize", resize); window.removeEventListener("pointermove", move) }
+  }, [])
+  return <canvas ref={canvasRef} className="v2-liquid-spray" aria-hidden="true" />
+}
+
 function HelmetPortrait({ locked }: { locked: boolean }) {
   return <div className={`v2-helmet-portrait ${locked ? "is-locked" : ""}`}>
     <Image className="v2-base-person" src={normalHero} alt="Santiago Espinosa" fill priority sizes="(max-width: 800px) 120vw, 64vw" />
@@ -135,6 +252,7 @@ export default function Home() {
       <div className="v2-face">
         <HelmetPortrait locked={helmetLocked} />
       </div>
+      <LiquidSpray />
       <button className={`v2-lock-control ${helmetLocked ? "is-locked" : ""}`} onClick={() => setHelmetLocked(value => !value)} aria-pressed={helmetLocked} data-cursor={helmetLocked ? "FREE" : "LOCK"}><span>{helmetLocked ? "RELEASE HELMET" : "LOCK HELMET"}</span><i /></button>
       <div className="v2-hero-status"><i /> MOVE CURSOR TO REVEAL</div>
       <div className="v2-latest"><span>LATEST BUILD</span><a href="https://github.com/espinosacodes/dreamJob" target="_blank" rel="noreferrer" data-cursor="OPEN"><div className="v2-latest-placeholder"><span>ARCH</span><i /></div><b>DreamJob</b></a></div>
